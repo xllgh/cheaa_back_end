@@ -1,0 +1,75 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.gizwits.bsh.mapper.AccessLogMapper">
+  <resultMap id="BaseResultMap" type="com.gizwits.bsh.model.entity.AccessLog">
+    <!--
+      WARNING - @mbggenerated
+    -->
+    <id column="id" jdbcType="BIGINT" property="id" />
+    <result column="user_id" jdbcType="VARCHAR" property="userId" />
+    <result column="plat_id" jdbcType="VARCHAR" property="platId" />
+    <result column="body_data" jdbcType="VARCHAR" property="bodyData" />
+    <result column="action" jdbcType="VARCHAR" property="action" />
+    <result column="access_time" jdbcType="TIMESTAMP" property="accessTime" />
+    <result column="access_ip" jdbcType="VARCHAR" property="accessIp" />
+  </resultMap>
+
+  <sql id="selectLogListCondition">
+    <where>
+      <if test="keyword != null and keyword != ''">
+        <if test="searchType == 'userName'">
+          u.user_name LIKE CONCAT('%', TRIM(#{keyword}), '%')
+        </if>
+        <if test="searchType == 'operationContent'">
+          l.action LIKE CONCAT('%', TRIM(#{keyword}), '%')
+        </if>
+      </if>
+    </where>
+    ORDER BY l.access_time DESC
+  </sql>
+
+  <select id="selectLogList" resultType="java.util.Map" parameterType="com.gizwits.bsh.bean.reqvo.web.OperationLogListReqVO">
+    SELECT u.user_name AS userName, l.action AS operationContent, l.access_time AS operationTime
+    FROM t_access_log l LEFT JOIN t_user_system u ON l.user_id = u.id
+    <include refid="selectLogListCondition"></include>
+    LIMIT #{start}, #{length}
+  </select>
+
+  <select id="selectLogListCount" resultType="int" parameterType="com.gizwits.bsh.bean.reqvo.web.OperationLogListReqVO">
+    SELECT COUNT(*)
+    FROM t_access_log l LEFT JOIN t_user_system u ON l.user_id = u.id
+    <include refid="selectLogListCondition"></include>
+  </select>
+
+  <!--<delete id="deleteByPrimaryKey" parameterType="java.lang.Long">-->
+    <!--delete from t_access_log-->
+    <!--where id = #{id,jdbcType=BIGINT}-->
+  <!--</delete>-->
+  <!--<insert id="insert" parameterType="com.gizwits.bsh.model.entity.AccessLog">-->
+    <!--insert into t_access_log (id, user_id, plat_id, -->
+      <!--body_data, action, access_time, -->
+      <!--access_ip)-->
+    <!--values (#{id,jdbcType=BIGINT}, #{userId,jdbcType=VARCHAR}, #{platId,jdbcType=VARCHAR},-->
+      <!--#{bodyData,jdbcType=VARCHAR}, #{action,jdbcType=VARCHAR}, #{accessTime,jdbcType=TIMESTAMP}, -->
+      <!--#{accessIp,jdbcType=VARCHAR})-->
+  <!--</insert>-->
+  <!--<update id="updateByPrimaryKey" parameterType="com.gizwits.bsh.model.entity.AccessLog">-->
+    <!--update t_access_log-->
+    <!--set user_id = #{userId,jdbcType=VARCHAR},-->
+      <!--plat_id = #{platId,jdbcType=VARCHAR},-->
+      <!--body_data = #{bodyData,jdbcType=VARCHAR},-->
+      <!--action = #{action,jdbcType=VARCHAR},-->
+      <!--access_time = #{accessTime,jdbcType=TIMESTAMP},-->
+      <!--access_ip = #{accessIp,jdbcType=VARCHAR}-->
+    <!--where id = #{id,jdbcType=BIGINT}-->
+  <!--</update>-->
+  <!--<select id="selectByPrimaryKey" parameterType="java.lang.Long" resultMap="BaseResultMap">-->
+    <!--select id, user_id, plat_id, body_data, action, access_time, access_ip-->
+    <!--from t_access_log-->
+    <!--where id = #{id,jdbcType=BIGINT}-->
+  <!--</select>-->
+  <!--<select id="selectAll" resultMap="BaseResultMap">-->
+    <!--select id, user_id, plat_id, body_data, action, access_time, access_ip-->
+    <!--from t_access_log-->
+  <!--</select>-->
+</mapper>

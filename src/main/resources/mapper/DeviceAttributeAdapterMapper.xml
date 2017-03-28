@@ -1,0 +1,28 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.gizwits.bsh.mapper.DeviceAttributeAdapterMapper">
+  <resultMap id="BaseResultMap" type="com.gizwits.bsh.model.entity.DeviceAttributeAdapter">
+    <!--
+      WARNING - @mbggenerated
+    -->
+    <id column="id" jdbcType="BIGINT" property="id" />
+    <result column="third_attr" jdbcType="VARCHAR" property="thirdAttr" />
+    <result column="standard_attr" jdbcType="VARCHAR" property="standardAttr" />
+    <result column="device_type" jdbcType="VARCHAR" property="deviceType" />
+    <result column="adapter_map" jdbcType="VARCHAR" property="adapterMap" />
+    <result column="plat_id" jdbcType="VARCHAR" property="platId" />
+    <result column="description" jdbcType="VARCHAR" property="description" />
+    <result column="reverse_adapter_map" jdbcType="VARCHAR" property="reverseAdapterMap" />
+  </resultMap>
+  <select id="selectByDeviceType" parameterType="com.gizwits.bsh.model.entity.DeviceAttributeAdapter" resultMap="BaseResultMap">
+    SELECT id, third_attr, standard_attr, device_type, adapter_map, plat_id, description, reverse_adapter_map
+    FROM t_device_attribute_adapter
+    WHERE device_type=#{deviceType} and plat_id=#{platId}
+  </select>
+
+  <select id="selectGroupByPlatIdAndDeviceType" resultMap="BaseResultMap">
+    SELECT device_type , plat_id
+    FROM t_device_attribute_adapter
+    GROUP BY device_type,plat_id
+  </select>
+</mapper>

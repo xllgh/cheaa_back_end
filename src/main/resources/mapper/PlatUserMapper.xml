@@ -1,0 +1,59 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.gizwits.bsh.mapper.PlatUserMapper">
+  <resultMap id="BaseResultMap" type="com.gizwits.bsh.model.entity.PlatUser">
+    <!--
+      WARNING - @mbggenerated
+    -->
+    <id column="id" jdbcType="BIGINT" property="id" />
+    <result column="user_id" jdbcType="VARCHAR" property="userId" />
+    <result column="user_name" jdbcType="VARCHAR" property="userName" />
+    <result column="plat_id" jdbcType="VARCHAR" property="platId" />
+    <result column="first_login_time" jdbcType="TIMESTAMP" property="firstLoginTime" />
+    <result column="last_login_time" jdbcType="TIMESTAMP" property="lastLoginTime" />
+    <result column="last_login_ip" jdbcType="VARCHAR" property="lastLoginIp" />
+    <result column="is_all" jdbcType="INTEGER" property="isAll" />
+  </resultMap>
+
+  <select id="selectByPlatId" parameterType="java.lang.String" resultMap="BaseResultMap">
+    select id, user_id,user_name, plat_id, first_login_time, last_login_time, last_login_ip,is_all
+    from t_user_plat
+    where plat_id = #{value}
+  </select>
+
+  <select id="selectByUserId" parameterType="java.lang.String" resultMap="BaseResultMap">
+    select id, user_id,user_name, plat_id, first_login_time, last_login_time, last_login_ip,is_all
+    from t_user_plat
+    where user_id LIKE CONCAT(TRIM(#{value}),'%')
+  </select>
+
+  <sql id="selectUserListCondition">
+    <where>
+      <if test="keyword != null and keyword != ''">
+        <if test="searchType == 'userName'">
+          user_id LIKE CONCAT('%', TRIM(#{keyword}), '%')
+        </if>
+      </if>
+      <if test="listAllFilter == 'on'">
+        AND is_all = 1
+      </if>
+    </where>
+    ORDER BY first_login_time DESC
+  </sql>
+
+  <select id="selectUserList" resultMap="BaseResultMap" parameterType="com.gizwits.bsh.bean.reqvo.web.UserListReqVO">
+    SELECT id, user_id, user_name,is_all FROM t_user_plat
+    <include refid="selectUserListCondition"></include>
+    LIMIT #{start}, #{length}
+  </select>
+
+  <select id="selectUserListCount" resultType="int" parameterType="com.gizwits.bsh.bean.reqvo.web.UserListReqVO">
+    SELECT COUNT(*) FROM t_user_plat
+    <include refid="selectUserListCondition"></include>
+  </select>
+
+  <update id="updateUserViewPermission" parameterType="com.gizwits.bsh.model.entity.PlatUser">
+    UPDATE t_user_plat set is_all=#{isAll} where user_id=#{userId}
+  </update>
+
+</mapper>

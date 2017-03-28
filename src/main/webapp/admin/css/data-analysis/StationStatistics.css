@@ -1,0 +1,54 @@
+.search-operator-id .operatorTypeSelectorResultList {
+	position: absolute;
+	top: 36px;
+	left: 132px;
+	background-color: white;
+	max-height: 322px;
+	z-index: 2;
+	border: 1px solid gray;
+}
+
+.search-operator-id .operatorTypeSelectorResultList ul {
+	padding: 0;
+	max-height: 320px;
+	overflow-y: auto;
+	overflow-x: hidden;
+	width: 258px;
+}
+
+.search-operator-id .operatorTypeSelectorResultList ul li {
+	padding: 0;
+    display: block;
+    line-height: 40px;
+    /* width: 200px; */
+    margin: 0;
+    width: inherit;
+    text-align: start;
+    border: none;
+    color: black;
+}
+
+.search-operator-id .operatorTypeSelectorResultList ul li .desc {
+	margin-left: 10px;
+}
+
+.search-operator-id .operatorTypeSelectorResultList ul li:hover {
+    color: black;
+}
+
+.search-operator-id .operatorTypeSelectorResultList ul > li:not(:first-child) {
+	width: inherit;
+}
+.search-operator-id .operatorTypeSelectorResultList ul .odd {
+	background-color: #f3f2f0;
+}
+
+.search-operator-id .operatorTypeSelectorResultList ul .even {
+	background-color: white;
+}
+
+.search-operator-id .operatorTypeSelectorResultList ul li .operator-check {
+	margin: 0;
+	float: right;
+	margin-right: 36px;
+}

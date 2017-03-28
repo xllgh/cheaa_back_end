@@ -1,0 +1,135 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.gizwits.bsh.mapper.DeviceMapper">
+  <resultMap id="BaseResultMap" type="com.gizwits.bsh.model.entity.Device">
+    <!--
+      WARNING - @mbggenerated
+    -->
+    <id column="id" jdbcType="BIGINT" property="id" />
+    <result column="device_id" jdbcType="VARCHAR" property="deviceId" />
+    <result column="name" jdbcType="VARCHAR" property="name" />
+    <result column="owner_id" jdbcType="VARCHAR" property="ownerId" />
+    <result column="plat_id" jdbcType="VARCHAR" property="platId" />
+    <result column="device_type" jdbcType="VARCHAR" property="deviceType" />
+    <result column="is_avail" jdbcType="CHAR" property="isAvail" />
+    <result column="creator" jdbcType="VARCHAR" property="creator" />
+    <result column="create_time" jdbcType="TIMESTAMP" property="createTime" />
+    <result column="updator" jdbcType="VARCHAR" property="updator" />
+    <result column="update_time" jdbcType="TIMESTAMP" property="updateTime" />
+    <result column="device_type" jdbcType="VARCHAR" property="deviceType" />
+    <result column="online" jdbcType="TINYINT" property="online" />
+  </resultMap>
+
+  <resultMap id="ResultMapWithPlat" type="com.gizwits.bsh.model.entity.Device" extends="BaseResultMap">
+    <result column="app_id" jdbcType="VARCHAR" property="appId" />
+    <result column="access_token" jdbcType="VARCHAR" property="accessToken" />
+    <result column="factory" jdbcType="VARCHAR" property="factory" />
+    <result column="control_image_uri" jdbcType="VARCHAR" property="imageUri" />
+  </resultMap>
+
+  <resultMap id="UserDeviceResultMap" type="com.gizwits.bsh.bean.resvo.web.UserDeviceVO">
+    <id column="id" jdbcType="BIGINT" property="id" javaType="java.lang.String" />
+    <result column="device_id" jdbcType="VARCHAR" property="deviceId" />
+    <result column="name" jdbcType="VARCHAR" property="deviceName" />
+    <result column="platform_name" jdbcType="VARCHAR" property="platformName" />
+  </resultMap>
+
+  <select id="selectByDeviceId" parameterType="java.lang.String" resultMap="ResultMapWithPlat">
+  select device.id, device.device_id, device.name, device.owner_id, device.plat_id, device.is_avail, device.creator, device.create_time, device.updator,
+  device.update_time,plat.app_id as app_id,plat.access_token as access_token,plat.factory as factory,device.device_type,typee.control_image_uri
+  from t_device device left JOIN t_plat plat on device.plat_id=plat.plat_id LEFT JOIN t_device_type typee on typee.plat_id=device.plat_id and typee.type_code=device.device_type
+  where device.device_id = #{VALUE ,jdbcType=VARCHAR} and device.is_avail=1
+  </select>
+
+  <select id="selectDevices" resultMap="ResultMapWithPlat">
+    select device.id, device.device_id, device.name, device.owner_id, device.plat_id, device.is_avail, device.creator, device.create_time, device.updator,
+    device.update_time,plat.app_id as app_id,plat.access_token as access_token,plat.factory as factory,device.device_type,typee.control_image_uri
+    from t_device device left JOIN t_plat plat on device.plat_id=plat.plat_id LEFT JOIN t_device_type typee on typee.plat_id=device.plat_id and typee.type_code=device.device_type
+    where device.is_avail=1
+  </select>
+
+  <select id="selectByUserId" parameterType="java.lang.String" resultType="java.util.Map">
+    select device.device_id as deviceId, device.name as name, bind.user_id as userId, device.plat_id as platId,device.device_type as deviceType,typee.list_image_uri as listImageUri
+    from t_device device,t_device_bind bind,t_device_type typee
+    where bind.device_id=device.device_id and bind.user_id LIKE CONCAT(TRIM(#{value}), '%') and typee.plat_id=device.plat_id and typee.type_code=device.device_type and bind.del=0 and device.is_avail=1
+  </select>
+
+  <select id="selectAllValidDevice" resultType="java.util.Map">
+    select device.device_id as deviceId, device.name as name, device.plat_id as platId,device.device_type as deviceType,typee.list_image_uri as listImageUri
+    from t_device device,t_device_type typee
+    where typee.plat_id=device.plat_id and typee.type_code=device.device_type and device.is_avail=1
+  </select>
+
+  <select id="selectByUserIdAndDeviceId" parameterType="com.gizwits.bsh.bean.resvo.DeviceBindResVO" resultMap="BaseResultMap">
+    select device.id, device.device_id, device.name, bind.user_id as owner_id, device.plat_id, device.is_avail, device.creator, device.create_time, device.updator,
+    device.update_time
+    from t_device device,t_device_bind bind
+    where bind.device_id=device.device_id and bind.user_id=#{UserID} and bind.device_id=#{DeviceID} and bind.del=0 and device.is_avail=1
+  </select>
+
+  <insert id="bindUserDevice" parameterType="com.gizwits.bsh.model.entity.Device">
+    insert into t_device_bind (id, device_id, user_id ,create_time)
+    values (#{id,jdbcType=BIGINT}, #{deviceId,jdbcType=VARCHAR}, #{ownerId,jdbcType=VARCHAR},now())
+  </insert>
+
+  <update id="unbindUserDevice" parameterType="com.gizwits.bsh.bean.resvo.DeviceUnbindResVO">
+    update t_device_bind set del=1 where device_id=#{DeviceID} and user_id=#{UserID}
+  </update>
+
+  <sql id="selectDeviceListCondition">
+    WHERE is_avail = 1
+    <if test="keyword != null and keyword != ''">
+      <if test="searchType == 'deviceName'">
+        AND name LIKE CONCAT('%', TRIM(#{keyword}), '%')
+      </if>
+      <if test="searchType == 'platformName'">
+        AND platform_name LIKE CONCAT('%', TRIM(#{keyword}), '%')
+      </if>
+      <if test="searchType == 'deivceId'">
+        AND device_id LIKE CONCAT('%', TRIM(#{keyword}), '%')
+      </if>
+    </if>
+    ORDER BY create_time DESC
+  </sql>
+
+  <select id="selectDeviceList" resultType="java.util.Map" parameterType="com.gizwits.bsh.bean.reqvo.web.DeviceListReqVO">
+    SELECT id, platform_name AS platformName, name AS deviceName, device_id AS deviceId, d.online
+    FROM t_device d LEFT JOIN t_platform_name p ON d.plat_id = p.plat_id
+    <include refid="selectDeviceListCondition"></include>
+    LIMIT #{start}, #{length}
+  </select>
+
+  <select id="selectDeviceListCount" resultType="int" parameterType="com.gizwits.bsh.bean.reqvo.web.DeviceListReqVO">
+    SELECT COUNT(*) FROM t_device d LEFT JOIN t_platform_name p ON d.plat_id = p.plat_id
+    <include refid="selectDeviceListCondition"></include>
+  </select>
+
+  <update id="deleteDevice" parameterType="java.lang.String">
+    UPDATE t_device SET is_avail = 0 WHERE device_id = #{deviceId} and is_avail=1
+  </update>
+  <update id="unbindDeletedDevice" parameterType="java.lang.String">
+    UPDATE t_device_bind SET del = 1 WHERE device_id = #{deviceId}
+  </update>
+
+  <sql id="selectUserDeviceListCondition">
+    WHERE b.del = 0 AND b.user_id = #{userId} AND d.is_avail = 1
+    ORDER BY b.create_time DESC
+  </sql>
+
+  <select id="selectUserDeviceList" resultMap="UserDeviceResultMap" parameterType="com.gizwits.bsh.bean.reqvo.web.UserDeviceListReqVO">
+    SELECT b.id, d.device_id AS deviceId, d.name AS deviceName, p.platform_name AS platformName
+    FROM t_device_bind b LEFT JOIN t_device d ON b.device_id = d.device_id LEFT JOIN t_platform_name p ON d.plat_id = p.plat_id
+    <include refid="selectUserDeviceListCondition"></include>
+    LIMIT #{start}, #{length}
+  </select>
+
+  <select id="selectUserDeviceListCount" resultType="int" parameterType="com.gizwits.bsh.bean.reqvo.web.UserDeviceListReqVO">
+    SELECT COUNT(*) FROM t_device_bind b LEFT JOIN t_device d ON b.device_id = d.device_id
+    <include refid="selectUserDeviceListCondition"></include>
+  </select>
+
+  <update id="unbindUserDeviceWithBindingId" parameterType="java.lang.String">
+    UPDATE t_device_bind SET del = 1 WHERE id = #{bindingId}
+  </update>
+
+</mapper>

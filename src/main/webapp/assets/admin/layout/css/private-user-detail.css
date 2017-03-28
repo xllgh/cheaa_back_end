@@ -1,0 +1,57 @@
+.user-identity {
+    position: relative;
+    top: -25px;
+    left: 0px;
+    font-size: 16px;
+    cursor: pointer;
+    display: inline-block;
+}
+.user-identity-hide {
+    display: none;
+}
+.user-identity-divider {
+    position: relative;
+    display: inline-block;
+    top: -25px;
+}
+.user-identity-divider-hide {
+    display: none;
+}
+.user-identity-detail {
+    border: 1px solid gray;
+    padding: 10px;
+    background-color: white;
+    font-family: Simsun, "宋体";
+    font-size: 12px;
+    cursor: default;
+    position: absolute;
+    top: 20px;
+    left: 0;
+    z-index: 100;
+}
+.user-identity-detail-hide {
+    display: none;
+}
+.user-identity-list-container {
+    height: 80px;
+    overflow-y: auto;
+    overflow-x: hidden;
+}
+.user-identity-list {
+    list-style-type: none;
+    padding: 0;
+    margin: 0;
+    border: 0;
+    width: 320px;;
+}
+.user-identity-list li {
+    display: inline-block;
+    width: 148px;
+    height: 30px;
+    line-height: 30px;
+    border-bottom: 1px solid gray;
+    margin-right: 10px;
+}
+.user-identity-list li a {
+    color: inherit;
+}

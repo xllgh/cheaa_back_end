@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.gizwits.bsh.mapper.TranslatorLogMapper">
+  <resultMap id="BaseResultMap" type="com.gizwits.bsh.model.entity.TranslatorLog">
+    <!--
+      WARNING - @mbggenerated
+    -->
+    <id column="id" jdbcType="VARCHAR" property="id" />
+    <result column="url" jdbcType="VARCHAR" property="url" />
+    <result column="headers" jdbcType="VARCHAR" property="headers" />
+    <result column="body" jdbcType="VARCHAR" property="body" />
+    <result column="response" jdbcType="VARCHAR" property="response" />
+    <result column="start_time" jdbcType="TIMESTAMP" property="startTime" />
+    <result column="end_time" jdbcType="TIMESTAMP" property="endTime" />
+    <result column="description" jdbcType="VARCHAR" property="description" />
+  </resultMap>
+
+</mapper>

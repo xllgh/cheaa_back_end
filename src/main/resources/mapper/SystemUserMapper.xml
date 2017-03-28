@@ -1,0 +1,80 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.gizwits.bsh.mapper.SystemUserMapper">
+  <resultMap id="BaseResultMap" type="com.gizwits.bsh.model.entity.SystemUser">
+    <!--
+      WARNING - @mbggenerated
+    -->
+    <id column="id" jdbcType="BIGINT" property="id" />
+    <result column="user_name" jdbcType="VARCHAR" property="userName" />
+    <result column="password" jdbcType="VARCHAR" property="password" />
+    <result column="create_time" jdbcType="TIMESTAMP" property="createTime" />
+    <result column="last_login_time" jdbcType="TIMESTAMP" property="lastLoginTime" />
+    <result column="last_login_ip" jdbcType="VARCHAR" property="lastLoginIp" />
+    <result column="role" jdbcType="VARCHAR" property="role" />
+  </resultMap>
+  <select id="selectUserByUsername" parameterType="java.lang.String" resultMap="BaseResultMap">
+    SELECT * FROM t_user_system WHERE user_name=#{VALUE} AND deleted = FALSE
+  </select>
+
+  <sql id="selectSystemUserListCondition">
+    WHERE deleted = FALSE
+    <if test="keyword != null and keyword != ''">
+      <if test="searchType == 'userName'">
+        AND user_name LIKE CONCAT('%', TRIM(#{keyword}), '%')
+      </if>
+    </if>
+    ORDER BY create_time DESC
+  </sql>
+
+  <select id="selectSystemUserList" resultMap="BaseResultMap" parameterType="com.gizwits.bsh.bean.reqvo.web.AdministratorListReqVO">
+    SELECT id, user_name, create_time, role FROM t_user_system
+    <include refid="selectSystemUserListCondition"></include>
+    LIMIT #{start}, #{length}
+  </select>
+
+  <select id="selectSystemUserListCount" resultType="int" parameterType="com.gizwits.bsh.bean.reqvo.web.AdministratorListReqVO">
+    SELECT COUNT(*) FROM t_user_system
+    <include refid="selectSystemUserListCondition"></include>
+  </select>
+
+  <select id="selectSysetemUserByUsername" parameterType="java.lang.String" resultMap="BaseResultMap">
+    SELECT * FROM t_user_system
+    WHERE user_name=#{VALUE } AND deleted = FALSE
+  </select>
+
+  <update id="deleteSystemUser" parameterType="java.lang.String">
+    UPDATE t_user_system SET deleted = TRUE WHERE id = #{id} AND (role IS NULL OR role != 'super')
+  </update>
+
+  <!--<delete id="deleteByPrimaryKey" parameterType="java.lang.Long">-->
+    <!--delete from t_user_system-->
+    <!--where id = #{id,jdbcType=BIGINT}-->
+  <!--</delete>-->
+  <!--<insert id="insert" parameterType="com.gizwits.bsh.model.entity.SystemUser">-->
+    <!--insert into t_user_system (id, user_name, password, -->
+      <!--create_time, last_login_time, last_login_ip-->
+      <!--)-->
+    <!--values (#{id,jdbcType=BIGINT}, #{userName,jdbcType=VARCHAR}, #{password,jdbcType=VARCHAR},-->
+      <!--#{createTime,jdbcType=TIMESTAMP}, #{lastLoginTime,jdbcType=TIMESTAMP}, #{lastLoginIp,jdbcType=VARCHAR}-->
+      <!--)-->
+  <!--</insert>-->
+  <!--<update id="updateByPrimaryKey" parameterType="com.gizwits.bsh.model.entity.SystemUser">-->
+    <!--update t_user_system-->
+    <!--set user_name = #{userName,jdbcType=VARCHAR},-->
+      <!--password = #{password,jdbcType=VARCHAR},-->
+      <!--create_time = #{createTime,jdbcType=TIMESTAMP},-->
+      <!--last_login_time = #{lastLoginTime,jdbcType=TIMESTAMP},-->
+      <!--last_login_ip = #{lastLoginIp,jdbcType=VARCHAR}-->
+    <!--where id = #{id,jdbcType=BIGINT}-->
+  <!--</update>-->
+  <!--<select id="selectByPrimaryKey" parameterType="java.lang.Long" resultMap="BaseResultMap">-->
+    <!--select id, user_name, password, create_time, last_login_time, last_login_ip-->
+    <!--from t_user_system-->
+    <!--where id = #{id,jdbcType=BIGINT}-->
+  <!--</select>-->
+  <!--<select id="selectAll" resultMap="BaseResultMap">-->
+    <!--select id, user_name, password, create_time, last_login_time, last_login_ip-->
+    <!--from t_user_system-->
+  <!--</select>-->
+</mapper>
