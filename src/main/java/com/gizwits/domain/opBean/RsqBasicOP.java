@@ -18,7 +18,17 @@ public class RsqBasicOP {
     @JsonProperty("DeviceAttr")
     private JSONObject DeviceAttr;
 
+ /*   @NotNull
+    @JsonProperty("UserID")
+    private String UserID;
 
+    public void setUserID(String userID){
+
+	UserID = userID;
+    }
+    
+    public String getUserID(){return UserID;}*/
+     
     public void setDeviceID(String deviceID) {
         DeviceID = deviceID;
     }

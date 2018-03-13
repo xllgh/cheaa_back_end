@@ -17,6 +17,22 @@
 		<!--<version>1.4.1.RELEASE</version>-->
 		<!--<relativePath/> &lt;!&ndash; lookup parent from repository &ndash;&gt;-->
 	<!--</parent>-->
+	<repositories>
+    		<repository>
+        <!-- Maven 自带的中央仓库使用的Id为central 如果其他的仓库声明也是用该Id
+        就会覆盖中央仓库的配置 -->
+		<id>mvnrepository</id>
+        	<name>mvnrepository</name>
+       	 	<url>https://mvnrepository.com/</url>
+        <layout>default</layout>
+        <releases>
+            <enabled>true</enabled>
+        </releases>
+        	<snapshots>
+            	<enabled>false</enabled>
+        	</snapshots>
+   	</repository>
+	</repositories>
 
 	<properties>
 		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
@@ -275,7 +291,6 @@
 			<version>4.11</version>
 			<scope>test</scope>
 		</dependency>
-
 		<!--在线api-->
 		<dependency>
 			<groupId>com.mangofactory</groupId>
@@ -302,23 +317,42 @@
 		</dependency>
 
 		<!-- Swagger -->
-		<!--<dependency>-->
-			<!--<groupId>io.springfox</groupId>-->
-			<!--<artifactId>springfox-swagger-ui</artifactId>-->
-			<!--<version>2.2.2</version>-->
-		<!--</dependency>-->
-		<!--<dependency>-->
-			<!--<groupId>io.springfox</groupId>-->
-			<!--<artifactId>springfox-swagger2</artifactId>-->
-			<!--<version>2.2.2</version>-->
-		<!--</dependency>-->
+		<dependency>
+			<groupId>io.springfox</groupId>
+			<artifactId>springfox-swagger-ui</artifactId>
+			<version>2.2.2</version>
+		</dependency>
+		<dependency>
+			<groupId>io.springfox</groupId>
+			<artifactId>springfox-swagger2</artifactId>
+			<version>2.2.2</version>
+		</dependency>
 
 		<dependency>
 			<groupId>org.aspectj</groupId>
 			<artifactId>aspectjweaver</artifactId>
 			<version>1.8.4</version>
 		</dependency>
-
+		<dependency>
+			<groupId>org.cheaa</groupId>
+			<artifactId>interconnection</artifactId>
+			<version>1.0.0_beta</version>
+			<scope>system</scope>
+			<systemPath>/home/ec2-user/SDK/SDKforCIC/SDK/interconnection-1.0.0_beta.jar</systemPath>
+		</dependency>
+		<!-- https://mvnrepository.com/artifact/commons-codec/commons-codec -->
+		<dependency>
+			<groupId>commmons-codec</groupId>
+			<artifactId>commons-codec</artifactId>
+			<version>1.11</version>
+			<scope>system</scope>
+			<systemPath>/home/ec2-user/commons/commons-codec-1.11.jar</systemPath>
+		</dependency>
+		<dependency>
+			<groupId>log4j</groupId>
+			<artifactId>log4j</artifactId>
+			<version>1.2.17</version>
+		</dependency>
 	</dependencies>
 
 	<build>

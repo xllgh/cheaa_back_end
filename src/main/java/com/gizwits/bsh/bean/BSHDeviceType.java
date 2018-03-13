@@ -7,8 +7,9 @@ public enum BSHDeviceType {
     FridgeFreezer("FridgeFreezer"),
     Oven("Oven"),
     CoffeeMaker("CoffeeMaker"),
-    Dishwasher("Dishwasher");
-
+    Dishwasher("Dishwasher"),
+    Washer("Washer");
+	
     private final String text;
 
     BSHDeviceType(final String text) {

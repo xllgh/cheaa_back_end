@@ -3,8 +3,10 @@ package com.gizwits.bsh.service.impl;
 import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.gizwits.bsh.bean.*;
 import com.gizwits.bsh.bean.resvo.DeviceListResVO;
+import com.gizwits.bsh.bean.resvo.DeviceResVO;
 import com.gizwits.bsh.bean.resvo.DeviceStatusResVO;
 import com.gizwits.bsh.mapper.BSHTokenMapper;
 import com.gizwits.bsh.mapper.DeviceMapper;
@@ -19,6 +21,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.ui.Model;
 import org.springframework.ui.ModelMap;
+import org.cheaa.interconnection.spi.IUDeviceIdConvert;
+import org.springframework.scheduling.annotation.Async;
 
 import java.util.*;
 import java.util.concurrent.TimeUnit;
@@ -31,6 +35,9 @@ public class HomeConnectServiceImpl implements HomeConnectService {
 
     private static Logger logger = LoggerFactory.getLogger(HomeConnectServiceImpl.class);
 
+    @Autowired
+    IUDeviceIdConvert udeviceIdConvert;
+    
     @Autowired
     BSHTokenMapper bshTokenMapper;
 
@@ -189,7 +196,11 @@ public class HomeConnectServiceImpl implements HomeConnectService {
     private void saveDevice(HomeAppliance homeAppliance) {
         Device record = new Device();
         record.setPlatId(bshPlatID);
-        record.setDeviceId(homeAppliance.getHaId());
+	logger.info("encoding udeviceId");
+	String udeviceId = "";
+	try{udeviceId = udeviceIdConvert.encode(homeAppliance.getHaId());}catch(Exception e){logger.info(""+e);}
+	logger.info(udeviceId);
+        record.setDeviceId(udeviceId);
         Device device;
         try {
             device = deviceMapper.select(record).get(0);
@@ -201,7 +212,7 @@ public class HomeConnectServiceImpl implements HomeConnectService {
             device.setCreateTime(new Date());
         }
         device.setPlatId(bshPlatID);
-        device.setDeviceId(homeAppliance.getHaId());
+        device.setDeviceId(udeviceId);
         device.setName(homeAppliance.getName());
         device.setIsAvail("0");
         device.setDeviceType(homeAppliance.getType());
@@ -266,9 +277,11 @@ public class HomeConnectServiceImpl implements HomeConnectService {
             return null;
         }
 
+
         List<HomeAppliance> devices = new ArrayList<>();
         for (Object homeappliance : homeappliances) {
             HomeAppliance device = JSON.toJavaObject((JSONObject)homeappliance, HomeAppliance.class);
+	    logger.info("Trying to save device");
             saveDevice(device);
             devices.add(device);
         }
@@ -290,11 +303,13 @@ public class HomeConnectServiceImpl implements HomeConnectService {
             if (deviceType != null) {
                 if (deviceType.equals(info.getDeviceType())) { // filter device type
                     BSHDevice bshDevice = new BSHDevice();
+		    info.setDeviceID(udeviceIdConvert.encode(info.getDeviceID()));
                     bshDevice.setDeviceInfo(info);
                     list.add(bshDevice);
                 }
             } else {
                 BSHDevice bshDevice = new BSHDevice();
+		info.setDeviceID(udeviceIdConvert.encode(info.getDeviceID()));
                 bshDevice.setDeviceInfo(info);
                 list.add(bshDevice);
             }
@@ -302,7 +317,48 @@ public class HomeConnectServiceImpl implements HomeConnectService {
         DeviceListResVO result = new DeviceListResVO(list);
         return result;
     }
+    private HomeAppliance bshGetDeviceInfo(String token, String deviceID){
+	String url = host + "/api/homeappliances/" + deviceID;
+	HttpRspObject response = HttpUtil.get(url,getCommonHeaders(token));
+	logAPI(url, null ,response);
+	JSONObject object = getResponseJSON(response);
+	if(object == null){
+		return null;
+	}
+	
+	JSONObject data = object.getJSONObject("data");
+	if(data == null){
+		handleError(object.getJSONObject("error"));
+		return null;
+	}
+//	JSONArray homeappliances = data.getJSONArray("homeappliances");
+	//if(homeappliances == null){
+	//	return null;
+	//}
+	//List<HomeAppliance> devices = new ArrayList<>();
+	//for (Object homeappliance : data){
+	HomeAppliance device = JSON.toJavaObject(data, HomeAppliance.class);
+	saveDevice(device);
+	
+	return device;
+	}	
 
+	
+    @Override
+    public DeviceResVO getDeviceInfo(String user, String deviceID){
+	deviceID = udeviceIdConvert.decode(deviceID);
+	String token = getAccessToken(user);
+	if (token == null){
+		return new DeviceResVO(RetObject.tokenError());
+			}
+	HomeAppliance device = bshGetDeviceInfo(token,deviceID);
+	BSHDeviceInfo info = new BSHDeviceInfo(device);
+	BSHDevice bshDevice = new BSHDevice();
+	info.setDeviceID(deviceID);
+	bshDevice.setDeviceInfo(info);
+	DeviceResVO result = new DeviceResVO(bshDevice);
+	return result;
+}
     private List<HomeApplianceStatus> bshGetSettings(String token, String deviceId) throws Error {
         String url = host + "/api/homeappliances/" + deviceId + "/settings";
         shouldBlockRequest();
@@ -418,7 +474,11 @@ public class HomeConnectServiceImpl implements HomeConnectService {
         if (token == null) {
             return new DeviceStatusResVO(RetObject.tokenError());
         }
-
+	deviceId = udeviceIdConvert.decode(deviceId);
+	if(deviceId == null){
+	    return new DeviceStatusResVO(RetObject.deviceNotExist());
+	}
+	logger.info(deviceId); 
         BSHDeviceType deviceType = getDeviceType(deviceId);
         if (deviceType == null) {
             return new DeviceStatusResVO(RetObject.deviceNotExist());
@@ -525,39 +585,147 @@ public class HomeConnectServiceImpl implements HomeConnectService {
         }
         return false;
     }
-
+   
+	 
+    @Override
+    @Async
+    public RetObject dataGateway(String user, String deviceId, String platID){
+	try{
+		Thread.sleep(2000);
+		DeviceStatusResVO result = getDeviceStatus(user,deviceId);
+		List<BSHDevice> devices = result.getDevices();
+		for(BSHDevice device: devices){
+			ModelMap deviceAttr = device.getDeviceAttr();
+			BSHDataGateway dataGateway = new BSHDataGateway(deviceId,deviceAttr);
+			String url = "";
+			if("000011".equals(platID)){
+				url = "http://test.kkapp.com/v1/dataservices/dataGateway";}
+			else if("000006".equals(platID)){
+				url = "http://203.187.186.136:8180/AWEConnectionDemo/v1/dataservices/dataGateway";
+			}else if("000003".equals(platID)){
+				return RetObject.success();}
+			Map<String, String> headers = new HashMap();
+			//headers.put("PlatID":"000003");
+			//headers.put("AppID":"12345678");
+			String body = new ObjectMapper().writeValueAsString(dataGateway);
+			logger.info(body);
+			HttpRspObject httpRspObject = HttpUtil.post(url,headers,body,"application/json;charset=UTF-8");
+			JSONObject httpRspBody = JSONObject.parseObject(httpRspObject.getBody());
+			String httpRetCode = httpRspBody.getString("RetCode");
+			logger.info("Gateway result is " + httpRetCode + "And " + httpRspBody.getString("RetInfo"));
+			RetObject ret = new RetObject();
+			//if("000011".equals(platID)){
+			//	ret = dataGatewayCoffee(user, deviceId, platID);			
+			//1}
+			if("200".equals(httpRetCode)){
+				return RetObject.success();
+			}	
+			}
+	}catch(Error error){
+		return RetObject.fail();
+	}catch (Exception exception){
+		exception.printStackTrace();
+	}
+	
+	return RetObject.fail();
+	}
+    @Override
+    @Async
+    public RetObject dataGatewayCoffee(String user, String deviceId, String platID){
+        try{
+                Thread.sleep(2000);
+                DeviceStatusResVO result = getDeviceStatus(user,deviceId);
+                List<BSHDevice> devices = result.getDevices();
+                for(BSHDevice device: devices){
+                        ModelMap deviceAttr = device.getDeviceAttr();
+                        BSHDataGateway dataGateway = new BSHDataGateway(deviceId,deviceAttr);
+                        String url = "";
+                        if("000011".equals(platID)){
+                                url = "http://test.kkapp.com/v1/dataservices/dataGateway";}
+                        else if("000006".equals(platID)){
+                                url = "http://203.187.186.136:8180/AWEConnectionDemo/v1/dataservices/dataGateway";
+                        }else if("000003".equals(platID)){
+                                }
+                        Map<String, String> headers = new HashMap();
+                        //headers.put("PlatID":"000003");
+                        //headers.put("AppID":"12345678");
+                        String body = new ObjectMapper().writeValueAsString(dataGateway);
+                        logger.info(body);
+                        HttpRspObject httpRspObject = HttpUtil.post(url,headers,body,"application/json;charset=UTF-8");
+                        JSONObject httpRspBody = JSONObject.parseObject(httpRspObject.getBody());
+                        String httpRetCode = httpRspBody.getString("RetCode");
+                        logger.info("Gateway result is " + httpRetCode + "And " + httpRspBody.getString("RetInfo"));
+			//return RetObject.success();
+                        }
+		Thread.sleep(120000);
+		DeviceStatusResVO result2 = getDeviceStatus(user,deviceId);
+                List<BSHDevice> devices2 = result2.getDevices();
+                for(BSHDevice device2: devices2){
+                        ModelMap deviceAttr = device2.getDeviceAttr();
+                        BSHDataGateway dataGateway = new BSHDataGateway(deviceId,deviceAttr);
+                        String url = "";
+                        if("000011".equals(platID)){
+                                url = "http://test.kkapp.com/v1/dataservices/dataGateway";}
+                        else if("000006".equals(platID)){
+                                url = "http://203.187.186.136:8180/AWEConnectionDemo/v1/dataservices/dataGateway";
+                        }else if("000003".equals(platID)){
+                                }
+                        Map<String, String> headers = new HashMap();
+                        //headers.put("PlatID":"000003");
+                        //headers.put("AppID":"12345678");
+                        String body = new ObjectMapper().writeValueAsString(dataGateway);
+                        logger.info(body);
+                        HttpRspObject httpRspObject = HttpUtil.post(url,headers,body,"application/json;charset=UTF-8");
+                        JSONObject httpRspBody = JSONObject.parseObject(httpRspObject.getBody());
+                        String httpRetCode = httpRspBody.getString("RetCode");
+                        logger.info("Gateway result is " + httpRetCode + "And " + httpRspBody.getString("RetInfo"));
+                        return RetObject.success();
+                        }
+        }catch(Error error){
+                return RetObject.fail();
+        }catch (Exception exception){
+                exception.printStackTrace();
+        }
+	return RetObject.fail();
+        }
     @Override
     public RetObject operateDevice(String user, String deviceId, ModelMap attr) {
         String token = getAccessToken(user);
         if (token == null) {
             return RetObject.tokenError();
         }
-
+	deviceId = udeviceIdConvert.decode(deviceId);
+	if(deviceId == null)
+	{
+		return RetObject.deviceNotExist();
+	}
         BSHDeviceType deviceType = getDeviceType(deviceId);
+
+	logger.info (""+deviceType);
         if (deviceType == null) {
             return RetObject.deviceNotExist();
         }
 
         HomeApplianceStatus setting = null;
         switch (deviceType) {
-            case FridgeFreezer: {
+        /*    case FridgeFreezer: {
                 setting = FridgeFreezerStatus.parseOperation(attr);
                 Boolean result = bshSetSettings(token, deviceId, setting);
                 if (result) {
                     return RetObject.success();
                 }
                 return RetObject.fail();
-            }
+            }*/
 
             case Oven: {
                 setting = OvenStatus.parseCommonSetting(attr);
                 break;
             }
 
-            case Dishwasher: {
+            /*case Dishwasher: {
                 setting = DishwasherStatus.parseCommonSetting(attr);
                 break;
-            }
+            }*/
             case CoffeeMaker: {
                 setting = CoffeemakerStatus.parseCommonSetting(attr);
                 break;
@@ -572,6 +740,7 @@ public class HomeConnectServiceImpl implements HomeConnectService {
             if (result) {
                 return RetObject.success();
             }
+	    logger.info("setting is null");
             return RetObject.fail();
         }
 
@@ -589,7 +758,7 @@ public class HomeConnectServiceImpl implements HomeConnectService {
                         return RetObject.success();
                     }
                     return RetObject.fail();
-                } else { // only set option
+                }/* else { // only set option
                     List<HomeApplianceStatus> options = OvenStatus.parseProgramOptions(attr);
                     if (options.size() == 0) {
                         return RetObject.fail();
@@ -614,10 +783,11 @@ public class HomeConnectServiceImpl implements HomeConnectService {
                     }
                     return RetObject.fail();
                 }
-                break;
+                break;*/
             case CoffeeMaker:
                 if (attr.get("program") != null) {
                     String programKey = CoffeemakerStatus.parseProgramKey(attr);
+	            logger.info(programKey);
                     if (programKey == null) {
                         return RetObject.fail();
                     }
@@ -643,7 +813,10 @@ public class HomeConnectServiceImpl implements HomeConnectService {
                 "000006".equals(platId) ||
                 "000007".equals(platId) ||
                 "000008".equals(platId) ||
-                "000009".equals(platId)) {
+                "000009".equals(platId) ||
+		"000010".equals(platId) ||
+		"000011".equals(platId) ||
+		"000012".equals(platId)) {
             return true;
         }
         return false;

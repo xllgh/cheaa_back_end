@@ -8,7 +8,8 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.InitializingBean;
 import org.springframework.beans.factory.annotation.Autowired;
-
+import org.cheaa.interconnection.server.sdk.ServerSDK;
+import org.cheaa.interconnection.client.sdk.ClientSDK;
 import java.util.List;
 import java.util.Map;
 
@@ -32,8 +33,8 @@ public class SysConsts implements InitializingBean{
     /**************************************/
     /*********海信、海尔、美的接口地址*********/
     /**************************************/
-    public static final String HOST_HAIXIN = "http://121.40.132.152";
-    public static final String HOST_HAIER = "http://123.103.113.62:80/AWEConnectionDemo";
+    public static final String HOST_HAIXIN = "http://localhost:8080";
+    public static final String HOST_HAIER = "http://localhost:8080";
     public static final String HOST_MEIDI = "http://openapi.midea.com:9003/v1";
     /**海信**/
     public static final String HOST_HAIXIN_DEVICE_OPERATOR = HOST_HAIXIN+"/1.1/devices/op";
@@ -71,5 +72,11 @@ public class SysConsts implements InitializingBean{
                         MapKit.covertListToMapWithKeyAttr(deviceAttributeAdapterMapper.selectByDeviceType(adapter),"standardAttr"));
             }
         }
-    }
+	try{
+                        ServerSDK.instance().init("/home/ec2-user/CHEAA/CHEAA_latest/cheaa_back_end/src/main/resources/configure");
+                        ClientSDK.instance().init("/home/ec2-user/CHEAA/CHEAA_latest/cheaa_back_end/src/main/resources/configure");
+                        logger.info("SDK inited and platid is " + ClientSDK.instance().getPLAT_ID());
+                        }catch (Exception e){logger.info(""+e);}
+
+        }
 }

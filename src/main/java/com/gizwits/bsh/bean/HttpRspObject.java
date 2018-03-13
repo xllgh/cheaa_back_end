@@ -14,6 +14,11 @@ public class HttpRspObject {
     private String body;
     private int statusCode;
 
+    public HttpRspObject(){
+	this.statusCode = 500;
+	this.body = "{\"RetCode\":\"500\",\"RetInfo\":\"失败\"}";
+	}
+
     public HttpRspObject(int statusCode, Map<String, String> headersMap, String body) {
         this.statusCode = statusCode;
         this.headersMap = headersMap;

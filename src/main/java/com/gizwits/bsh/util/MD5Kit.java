@@ -123,7 +123,7 @@ public class MD5Kit {
 
 
     public static void main(String args[]) {
-        String mima = MD5Kit.encodeSalt("yyc888", "耗子");
+        String mima = MD5Kit.encodeSalt("bosh-1234", "");
 
         System.out.println(mima);
     }

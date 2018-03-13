@@ -10,7 +10,7 @@
           - name: log.level.xjj
             value: trace
           - name: log.path
-            value: /data/project/log/dryer
+            value: /home/ec2-user/logs/
           - name: project.name
             value: bsh-spring-boot
 

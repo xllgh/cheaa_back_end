@@ -4,6 +4,7 @@
        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
        xmlns:context="http://www.springframework.org/schema/context"
        xmlns:aop="http://www.springframework.org/schema/aop"
+       xmlns:task = "http://www.springframework.org/schema/task"
        xsi:schemaLocation="http://www.springframework.org/schema/beans
 http://www.springframework.org/schema/beans/spring-beans.xsd
 http://www.springframework.org/schema/context
@@ -11,9 +12,16 @@ http://www.springframework.org/schema/context/spring-context.xsd
 http://www.springframework.org/schema/aop
 http://www.springframework.org/schema/aop/spring-aop.xsd
 http://www.springframework.org/schema/mvc
-http://www.springframework.org/schema/mvc/spring-mvc.xsd">
+http://www.springframework.org/schema/mvc/spring-mvc.xsd
+http://www.springframework.org/schema/task
+http://www.springframework.org/schema/task/spring-task-3.2.xsd
+">
 
 
+    
+ 
+    <task:annotation-driven />
+    <context:component-scan base-package="com.gizwits.bsh.schedule" />
     <!-- jackson 方案 -->
     <mvc:annotation-driven>
         <mvc:message-converters>
@@ -51,7 +59,10 @@ http://www.springframework.org/schema/mvc/spring-mvc.xsd">
 
     <!--<mvc:annotation-driven/>-->
     <!-- 设置使用注解的类所在的jar包 -->
+    
     <context:component-scan base-package="com.gizwits.bsh.controller"/>
+    <mvc:resources mapping="*.html" location="/"/>
+    <mvc:resources mapping="/**" location="/"/>
     <aop:aspectj-autoproxy proxy-target-class="true"/>
     <!--<context:component-scan base-package="com.gizwits.bsh.service.impl"/>-->
     <!-- 启用spring mvc 注解 -->

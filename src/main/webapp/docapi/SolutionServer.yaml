@@ -1,0 +1,491 @@
+swagger: '2.0'
+info:
+  description: >-
+    This Swagger UI is for showcase which will list all important API information in RGC Solution Server
+  version: 2.1.0
+  title: RGC Solution Server Swagger UI
+  contact:
+    email: weipeng.wang@bshg.com
+  license:
+    name: Apache 2.0
+    url: 'http://www.apache.org/licenses/LICENSE-2.0.html'
+host: sfm-solution-validation.home-connect.cn
+tags:
+  - name: Shopping List
+    description: Shopping List feature in Speedboat
+  - name: Weather
+    description: IP Location and Weather service in Speedboat
+  - name: HomeConnect Recipes with Douguo
+    description: Recipe Intergration feature with Douguo
+schemes:
+  - https
+paths:
+  /app/shoppingList/list:
+    parameters:
+      - name: bshtoken
+        in: header
+        description: Auth token from BSH
+        type: string
+        required: true
+      - name: Content-Type
+        in: header
+        type: string
+        required: true
+        enum:
+        - 'application/json'
+    get:
+      tags:
+        - Shopping List
+      operationId: shoppinglist
+      consumes:
+        - application/json
+      produces:
+        - application/json
+      responses:
+        '200':
+          description: Fetch successfully
+          schema:
+              $ref: '#/definitions/ShoppingListOK'
+    delete:
+      tags:
+        - Shopping List
+      operationId: shoppinglistDel
+      produces:
+        - application/json
+      responses:
+        '200':
+          description: Delete Successfully
+          schema:
+            $ref: '#/definitions/SuccessRsp'
+  /app/shoppingList/items:
+    parameters:
+      - name: bshtoken
+        in: header
+        description: Auth token from BSH
+        type: string
+        required: true
+    post:
+      tags:
+        - Shopping List
+      operationId: shoppinglistItems
+      consumes:
+        - application/json
+      produces:
+        - application/json
+      parameters:
+        - name: body
+          in: body
+          description: ''
+          required: true
+          schema:
+            $ref: '#/definitions/ShoppingListItemsBody'
+      responses:
+        '200':
+          description: Fetch successfully
+          schema:
+              $ref: '#/definitions/SuccessRsp'
+  /app/shoppingList/item/{id}:
+    parameters:
+      - name: id
+        in: path 
+        description: ''
+        required: true
+        type: string
+      - name: bshtoken
+        in: header
+        description: Auth token from BSH
+        type: string
+        required: true
+
+    post:
+      tags:
+        - Shopping List
+      operationId: shoppinglistId
+      consumes:
+        - application/json
+      produces:
+        - application/json
+      parameters:
+        - name: body
+          in: body
+          description: ''
+          required: true
+          schema:
+            $ref: '#/definitions/ShoppingItemState'
+      responses:
+        '200':
+          description: Fetched
+          schema:
+            $ref: '#/definitions/SuccessRsp'
+  /app/shoppingList/item:
+    parameters:
+      - name: id
+        in: path
+        description: ''
+        required: true
+        type: string
+      - name: bshtoken
+        in: header
+        description: ''
+        required: true
+        type: string
+    delete:
+      tags:
+        - Shopping List
+      operationId: shoppingItemDel
+      consumes:
+        - application/json
+      produces:
+        - application/json
+      parameters:
+        - name: body
+          in: body
+          description: ''
+          schema:
+            $ref: '#/definitions/ShoppingItemDelete'
+      responses:
+        '200':
+          description: ''
+          schema:
+            $ref: '#/definitions/SuccessRsp'
+  /sfmapi/service/v1/weather/getWeather:
+    parameters:
+      - name: cityId
+        in: query
+        required: true
+        description: ''
+        type: string
+      - name: bshtoken
+        in: header
+        required: true
+        description: ''
+        type: string
+      - name: Content-Type
+        in: header
+        required: true
+        description: ''
+        type: string
+    get:
+      tags: 
+        - Weather
+      operationId: getWeather
+      produces:
+        -  application/json
+      responses:
+        '200':
+          description: ''
+          schema:
+            $ref : '#/definitions/WeatherRsp'
+  /api/recipes:
+    get:
+      tags:
+        - HomeConnect Recipes with Douguo
+      operationId: recipeGet
+      produces:
+        - application/json
+      parameters:
+        - name: tag[]
+          in: query
+          description: ''
+          type: string
+        - name: keyword
+          in : query
+          description: ''
+          type: string
+        - name: page
+          in: query
+          description: ''
+          type: integer
+        - name: pagenum
+          in : query
+          description: ''
+          type: integer
+      responses:
+        '200':
+          description: ''
+          schema:
+            $ref: '#/definitions/RecipeGetSuccess'
+  /api/recipes/{id}:
+    parameters:
+      - name: id
+        in: path
+        description: ''
+        required: true
+        type: string
+    get:
+      tags:
+        - HomeConnect Recipes with Douguo
+      operationId: RecipeDetails
+      produces:
+        - application/json
+      responses:
+        '200':
+          description: ''
+          schema:
+            $ref: '#/definitions/RecipeGetDetailSuccess'
+  /api/tags:
+    get:
+      tags:
+        - HomeConnect Recipes with Douguo
+      operationId: GetTags
+      produces:
+        - application/json
+      responses:
+        '200':
+          description: '' 
+          schema:
+            $ref: '#/definitions/RecipeGetDetailSuccess'
+  /hot-words:
+    get:
+      tags:
+        - HomeConnect Recipes with Douguo
+      operationId: hotWordsGet
+      produces:
+        - application/json;charset=utf-8
+      responses:
+        '200':
+          description: ''
+          schema:
+            $ref: '#/definitions/hotwordGetSuccess'
+  /recipes/weekly:
+    get:
+      tags:
+        - HomeConnect Recipes with Douguo
+      operationId: weeklyGet
+      produces:
+        - application/json;charset=utf-8
+      responses:
+        '200':
+          description: ''
+          schema:
+            $ref: '#/definitions/RecipeGetSuccess'
+  /recipes/recommend/home:
+    parameters:
+      - name: page
+        in: query
+        description: ''
+        type: string
+      - name: pagenum
+        in: query
+        description: ''
+        type: string
+    get:
+      tags: 
+        - HomeConnect Recipes with Douguo
+      operationId: getHome
+      produces:
+        - application/json;charset=utf-8
+      responses:
+        '200':
+          description: ''
+          schema:
+            $ref: '#/definitions/RecipeGetSuccess'
+  /recipe/recommend:
+    parameters:
+      - name: page
+        in: query
+        description: ''
+        type: string
+      - name: pagenum
+        in: query
+        description: ''
+        type: string
+    get:
+      tags:
+        - HomeConnect Recipes with Douguo
+      operationId: recommend
+      produces:
+        - application/json;charset=utf-8
+      responses:
+        '200':
+          description: ''
+          schema:
+            $ref: '#/definitions/RecipeGetSuccess'
+  /recipe/{id}/recommend:
+    parameters:
+      - name: id
+        in: path
+        description: ''
+        type: integer
+        required: true
+      - name: page
+        in: query
+        description: ''
+        type: string
+      - name: pagenum
+        in: query
+        description: ''
+        type: string
+    get:
+      tags:
+        - HomeConnect Recipes with Douguo
+      operationId: recommendId
+      produces:
+        - application/json;charset=utf-8
+      responses:
+        '200':
+          description: ''
+          schema:
+            $ref : '#/definitions/RecipeGetSuccess'
+  /recipes/invalid:
+    post:
+      tags:
+        - HomeConnect Recipes with Douguo
+      operationId: invaildCheck
+      consumes:
+        - application/json;charset=utf-8
+      produces:
+        - application/json;charset=utf-8
+      parameters:
+        - name: ids
+          in: body
+          schema:
+            $ref : '#/definitions/invalidCheckBody'
+      responses:
+        '200':
+          description: ''
+          schema:
+            $ref: '#/definitions/RecipeGetSuccess'
+definitions:
+  ShoppingListOK:
+    type: object
+    properties:
+      code: 
+        type: string
+      msg:
+        type: string
+      data:
+        type: array
+        items:
+          type: object
+          properties:
+            total:
+              type: string
+  ShoppingListItemsBody:
+    type: object
+    required:
+      - title
+      - note
+    properties:
+      cookId:
+        type: integer
+      cookName: 
+        type: string
+      title:
+        type: string
+      note: 
+        type: string
+  ShoppingItemState:
+    type: object
+    required:
+      - state
+    properties:
+      state:
+        type: integer
+  ShoppingItemDelete:
+    type: object
+    required:
+      - Items
+    properties:
+      Items:
+        type: array
+        items:
+          type: object
+          properties:
+            itemId:
+              type: string
+  invalidCheckBody:
+    type: object
+    properties:
+      ids:
+        type: array
+        items:
+          type: object
+  DeviceStatusInfoResponse:
+    type: object
+    properties:
+      Device:
+        type: array
+        items:
+          type: object
+          properties:
+            Device:
+              type: array
+              items:
+                type: object
+                properties:
+                  DeviceAttr:
+                    type: object
+      RetCode:
+        type: string
+      RetInfo:
+        type: string
+    example:
+      Device:
+        - DeviceAttr:
+            targetTemperature: '40'
+            onOffStatu: 'true'
+            volume: '50'
+            heatingStatus: '1'
+            currentTemperature: '45'
+      RetCode: '200'
+      RetInfo: ????????????
+  hotwordGetSuccess:
+    type: object
+    properties:
+      code:
+        type: string
+      msg: 
+        type: string
+      data:
+        type: array
+        items:
+          type: object
+  RecipeGetSuccess:
+    type: object
+    properties:
+      code:
+        type: string
+      msg:
+        type: string
+      data:
+        type: object
+        properties:
+          total:
+            type: string
+          recipes:
+            type: array
+            items:
+              type: object
+  RecipeGetDetailSuccess:
+    type: object
+    properties:
+      code:
+        type: string
+      msg: 
+        type: string
+      data:
+        type: object
+  WeatherRsp:
+    type: object
+    properties:
+      retCode:
+        type: string
+      retInfo:
+        type: string
+      retBody:
+        type: object
+  SuccessRsp:
+    type: object
+    properties:
+      code: 
+        type: string
+      msg:
+        type: string
+  Error:
+    type: object
+    properties:
+      RetCode:
+        type: string
+      RetInfo:
+        type: string

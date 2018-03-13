@@ -1,0 +1,304 @@
+swagger: '2.0'
+info:
+  description: >-
+    This UI is for BSH CHEAA showcase. It contains two part: Controlled by 3rd
+    party and controll 3rd party
+  version: 2.1.0
+  title: CHEAA Phase 2 Swagger UI
+  contact:
+    email: weipeng.wang@bshg.com
+  license:
+    name: Apache 2.0
+    url: 'http://www.apache.org/licenses/LICENSE-2.0.html'
+host: cheaa-test.home-connect.cn
+basePath: /mykie
+tags:
+  - name: Get HA List
+    description: Get how many HAs are connecting to specific account
+  - name: Get HA Status
+    description: Get HA's current Status
+  - name: Operate HA
+    description: Operate HA's programm
+schemes:
+  - https
+paths:
+  /users/devices:
+    parameters:
+      - name: PlatID
+        in: header
+        description: BSH PlatID definited by CHEAA
+        type: string
+        required: true
+        enum:
+          - '000003'
+      - name: Authorization
+        in: header
+        description: Basic Auth for backend
+        type: string
+        required: true
+      - name: AppID
+        in: header
+        type: string
+        description: App ID for definite client
+    post:
+      tags:
+        - Get HA List
+      operationId: GetHA
+      consumes:
+        - application/json
+      produces:
+        - application/json
+      parameters:
+        - name: body
+          in: body
+          description: ''
+          required: true
+          schema:
+            $ref: '#/definitions/UserHA'
+      responses:
+        '200':
+          description: Fetch successfully
+          schema:
+            $ref: '#/definitions/HAListOK'
+        '500':
+          description: Fetch failed
+          schema:
+            $ref: '#/definitions/Error'
+          examples:
+            Error:
+              RetCode: '500'
+              RetInfo: 失败
+  /devices/deviceStatus:
+    parameters:
+      - name: PlatID
+        in: header
+        description: BSH PlatID definited by CHEAA
+        type: string
+        required: true
+        enum:
+          - '000003'
+      - name: Authorization
+        in: header
+        description: Basic Auth for backend
+        type: string
+        required: true
+      - name: AppID
+        in: header
+        type: string
+        description: App ID for definite client
+    post:
+      tags:
+        - Get HA Status
+      consumes:
+        - application/json
+      produces:
+        - application/json
+      parameters:
+        - name: body
+          in: body
+          description: ''
+          required: true
+          schema:
+            $ref: '#/definitions/DeviceStatusBody'
+      responses:
+        '200':
+          description: Fetch successfully
+          schema:
+            $ref: '#/definitions/DeviceStatusInfoResponse'
+        '500':
+          description: Fetch failed
+          schema:
+            $ref: '#/definitions/DeviceStatusInfoError'
+          examples:
+            Error:
+              RetCode: '500'
+              RetInfo: 失败
+              Device: []
+  /devices/op:
+    parameters:
+      - name: PlatID
+        in: header
+        description: BSH PlatID definited by CHEAA
+        type: string
+        required: true
+        enum:
+          - '000003'
+      - name: Authorization
+        in: header
+        description: Basic Auth for backend
+        type: string
+        required: true
+      - name: AppID
+        in: header
+        type: string
+        description: App ID for definite client
+    post:
+      tags:
+        - Operate HA
+      consumes:
+        - application/json
+      produces:
+        - application/json
+      parameters:
+        - name: body
+          in: body
+          description: ''
+          required: true
+          schema:
+            $ref: '#/definitions/DeviceOperationBody'
+      responses:
+        '200':
+          description: Fetch successfully
+          schema:
+            $ref: '#/definitions/DeviceOperationResposne'
+        '500':
+          description: Fetch failed
+          schema:
+            $ref: '#/definitions/Error'
+          examples:
+            Error:
+              RetCode: '500'
+              RetInfo: 失败
+definitions:
+  UserHA:
+    type: object
+    properties:
+      UserID:
+        type: string
+  HAListOK:
+    type: object
+    properties:
+      Device:
+        type: array
+        items:
+          type: object
+          properties:
+            DeviceAttr:
+              type: object
+            DeviceInfo:
+              type: array
+              items:
+                type: object
+              properties:
+                model:
+                  type: string
+                accessway:
+                  type: integer
+                manufacturer:
+                  type: string
+                deviceType:
+                  type: string
+                deviceID:
+                  type: string
+                brand:
+                  type: string
+                deviceIDType:
+                  type: integer
+      RetCode:
+        type: string
+      RetInfo:
+        type: string
+    example:
+      Device:
+        DeviceAttr: []
+        DeviceInfo:
+          model: 热水器
+          accessway: 1
+          manufacturer: 长虹
+          deviceType: '05001016'
+          deviceID: G291059998WB06515060000L
+          brand: EnEn-111
+          deviceIDType: 3
+      RetCode: '200'
+      RetInfo: 查找成功
+  DeviceStatusBody:
+    type: object
+    properties:
+      UserID:
+        type: string
+      Device:
+        type: array
+        items:
+          type: object
+          properties:
+            DeviceInfo:
+              type: array
+              items:
+                type: object
+                properties:
+                  deviceID:
+                    type: string
+    example:
+      UserID: '2'
+      Device:
+        - DeviceInfo:
+            deviceID: 0000045001016G291059998WB06515060000L
+  DeviceStatusInfoResponse:
+    type: object
+    properties:
+      Device:
+        type: array
+        items:
+          type: object
+          properties:
+            Device:
+              type: array
+              items:
+                type: object
+                properties:
+                  DeviceAttr:
+                    type: object
+      RetCode:
+        type: string
+      RetInfo:
+        type: string
+    example:
+      Device:
+        - DeviceAttr:
+            targetTemperature: '40'
+            onOffStatu: 'true'
+            volume: '50'
+            heatingStatus: '1'
+            currentTemperature: '45'
+      RetCode: '200'
+      RetInfo: 查找成功
+  DeviceOperationBody:
+    properties:
+      DeviceID:
+        type: string
+      DeviceAttr:
+        type: array
+        items:
+          type: object
+          properties:
+            DeviceAttr:
+              type: object
+    example:
+      DeviceID: 0000045001016G291059998WB06515060000L
+      DeviceAttr:
+        targetTemperature: '40'
+  DeviceOperationResposne:
+    properties:
+      RetCode:
+        type: string
+      RetInfo:
+        type: string
+    example:
+      RetCode: '200'
+      RetInfo: 成功
+  DeviceStatusInfoError:
+    type: object
+    properties:
+      RetCode:
+        type: string
+      RetInfo:
+        type: string
+      Device:
+        type: object
+  Error:
+    type: object
+    properties:
+      RetCode:
+        type: string
+      RetInfo:
+        type: string

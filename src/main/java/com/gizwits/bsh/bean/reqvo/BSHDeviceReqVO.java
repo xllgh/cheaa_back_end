@@ -33,6 +33,13 @@ public class BSHDeviceReqVO {
         this.device = device;
     }
 
+    /*@JsonIgnore
+    public String getLoginID() {
+	if(getUserID() == null || getUserID().size() == 0) {
+		return null;
+	}
+	return getUserID().get(0).get(0);
+	}*/
     @JsonIgnore
     public String getDeviceType() {
         if (getDevice() == null || getDevice().size() == 0) {

@@ -63,7 +63,9 @@ public class RetObject {
     public static RetObject tokenError() {
         return new RetObject("500", "用户验证失败");
     }
-
+    public static RetObject init(){
+	return new RetObject("000", "Code init failed");
+    }
     public String getRetCode() {
         return retCode;
     }

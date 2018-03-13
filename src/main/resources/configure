@@ -1,0 +1,16 @@
+{
+	"plat_id":"000003",
+	"sdk_version":"v1",
+	"server":{
+		"user_container":"false"
+},
+	"client":{
+		"urls":
+		{
+			"000003":{
+				"same_network":"true",
+				"host":"http://127.0.0.1:8080"
+			}
+	}	
+}
+}
